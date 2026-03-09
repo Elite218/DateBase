@@ -1,0 +1,1245 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#060a12">
+<title>Politie Systeem — Nationaal Database</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#060a12;--s1:#0b1220;--s2:#0f1829;--s3:#131e30;
+  --b1:rgba(255,255,255,.055);--b2:rgba(255,255,255,.10);--b3:rgba(255,255,255,.16);
+  --blue:#1d4ed8;--blue2:#2563eb;--blue3:#3b82f6;--blue-d:rgba(37,99,235,.14);--blue-g:rgba(37,99,235,.28);
+  --gold:#ca9a3c;--gold-d:rgba(202,154,60,.13);
+  --red:#c0392b;--red2:#dc2626;--red-d:rgba(220,38,38,.13);
+  --amber:#b45309;--amber-d:rgba(180,83,9,.13);
+  --green:#15803d;--green-d:rgba(21,128,61,.13);
+  --purple:#7c3aed;--purple-d:rgba(124,58,237,.13);
+  --t1:#f0f4ff;--t2:#8ca0be;--t3:#3d5270;--t4:#243044;
+  --r:10px;--r2:8px;--r3:6px;--hdr:60px;--sidebar:340px;
+}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+body{background:var(--bg);color:var(--t2);font-family:'DM Sans',sans-serif;min-height:100vh;overflow-x:hidden;font-size:15px;line-height:1.5}
+body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;background:radial-gradient(ellipse 900px 500px at 15% -5%,rgba(29,78,216,.07) 0%,transparent 65%),radial-gradient(ellipse 700px 400px at 85% 105%,rgba(29,78,216,.05) 0%,transparent 65%)}
+img,svg{display:block}
+button{font-family:inherit;cursor:pointer;border:none;background:none}
+input,select,textarea{font-family:inherit;font-size:inherit}
+::-webkit-scrollbar{width:4px;height:4px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:rgba(59,130,246,.35);border-radius:4px}
+
+/* HEADER */
+#header{position:fixed;top:0;left:0;right:0;z-index:100;height:var(--hdr);background:rgba(6,10,18,.92);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border-bottom:1px solid var(--b1);display:flex;align-items:center;justify-content:space-between;padding:0 1.5rem;gap:1rem}
+.hdr-logo{display:flex;align-items:center;gap:10px;flex-shrink:0}
+.hdr-badge{width:34px;height:34px;border-radius:var(--r3);background:var(--blue2);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.hdr-title{font-family:'Syne',sans-serif;font-size:.95rem;font-weight:700;color:var(--t1);letter-spacing:.04em;line-height:1}
+.hdr-sub{font-family:'DM Mono',monospace;font-size:.55rem;color:var(--t3);letter-spacing:.18em;text-transform:uppercase;margin-top:2px}
+.hdr-right{display:flex;align-items:center;gap:1rem;flex-shrink:0}
+.hdr-status{display:flex;align-items:center;gap:6px;font-family:'DM Mono',monospace;font-size:.6rem;color:var(--t3);letter-spacing:.1em;border:1px solid var(--b1);border-radius:100px;padding:3px 10px}
+.status-dot{width:5px;height:5px;border-radius:50%;background:#22c55e;box-shadow:0 0 6px #22c55e;animation:blink 2.5s ease-in-out infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+.hdr-clock{font-family:'DM Mono',monospace;font-size:.8rem;color:var(--t2);letter-spacing:.1em;min-width:68px;text-align:right}
+.hdr-menu-btn{display:none;width:36px;height:36px;border-radius:var(--r3);border:1px solid var(--b2);color:var(--t2);align-items:center;justify-content:center}
+
+/* LAYOUT */
+#app{padding-top:var(--hdr);min-height:100vh;display:flex;flex-direction:column;position:relative;z-index:1}
+.page{display:flex;flex:1;min-height:calc(100vh - var(--hdr))}
+
+/* NAV TABS (Personen / Zaken) */
+.nav-tabs{display:flex;gap:2px;padding:0 1rem;border-bottom:1px solid var(--b1);background:var(--s1);flex-shrink:0}
+.nav-tab{font-family:'DM Mono',monospace;font-size:.62rem;letter-spacing:.12em;text-transform:uppercase;color:var(--t3);padding:10px 12px;border-bottom:2px solid transparent;cursor:pointer;transition:color .15s,border-color .15s;display:flex;align-items:center;gap:6px;white-space:nowrap}
+.nav-tab:hover{color:var(--t2)}
+.nav-tab.active{color:var(--blue3);border-bottom-color:var(--blue2)}
+.nav-tab-badge{background:var(--blue-d);color:var(--blue3);border-radius:100px;padding:1px 6px;font-size:.55rem}
+
+/* SIDEBAR */
+#sidebar{width:var(--sidebar);flex-shrink:0;background:var(--s1);border-right:1px solid var(--b1);display:flex;flex-direction:column;position:sticky;top:var(--hdr);height:calc(100vh - var(--hdr));overflow:hidden}
+.sb-search{padding:1rem;border-bottom:1px solid var(--b1)}
+.sb-search-label{font-family:'DM Mono',monospace;font-size:.58rem;color:var(--t3);letter-spacing:.2em;text-transform:uppercase;margin-bottom:6px}
+.sb-search-row{display:flex;gap:6px}
+.sb-search-box{position:relative;flex:1}
+.sb-search-ico{position:absolute;left:10px;top:50%;transform:translateY(-50%);color:var(--t3);pointer-events:none;transition:color .2s}
+.sb-search-box:focus-within .sb-search-ico{color:var(--blue3)}
+.sb-input{width:100%;background:var(--s2);border:1px solid var(--b1);border-radius:var(--r2);color:var(--t1);font-size:.875rem;padding:0 .75rem 0 2.25rem;height:38px;outline:none;transition:border-color .2s,box-shadow .2s}
+.sb-input::placeholder{color:var(--t3)}
+.sb-input:focus{border-color:var(--blue2);box-shadow:0 0 0 3px var(--blue-d)}
+.sb-add-btn{height:38px;padding:0 .75rem;background:var(--blue2);border-radius:var(--r2);color:#fff;font-size:.8rem;font-weight:500;display:flex;align-items:center;gap:5px;flex-shrink:0;transition:background .15s,box-shadow .15s;white-space:nowrap}
+.sb-add-btn:hover{background:var(--blue3);box-shadow:0 3px 12px var(--blue-g)}
+.sb-search-mode{display:flex;gap:4px;margin-top:8px}
+.sb-mode-btn{flex:1;height:26px;font-family:'DM Mono',monospace;font-size:.56rem;letter-spacing:.08em;text-transform:uppercase;border-radius:5px;border:1px solid var(--b1);color:var(--t3);background:transparent;cursor:pointer;transition:background .15s,color .15s,border-color .15s}
+.sb-mode-btn.active{background:var(--blue-d);color:var(--blue3);border-color:rgba(37,99,235,.3)}
+.sb-results{flex:1;overflow-y:auto;padding:8px}
+.sb-count{font-family:'DM Mono',monospace;font-size:.58rem;color:var(--t3);letter-spacing:.1em;padding:6px 4px 4px;text-transform:uppercase}
+.sb-nf{margin:4px;padding:10px 12px;background:rgba(37,99,235,.06);border:1px solid rgba(37,99,235,.18);border-radius:var(--r2);display:none}
+.sb-nf.show{display:block}
+.sb-nf p{font-family:'DM Mono',monospace;font-size:.62rem;color:var(--t2);letter-spacing:.04em;line-height:1.7}
+.sb-nf-btn{margin-top:8px;width:100%}
+.sb-empty{padding:2.5rem 1rem;text-align:center}
+.sb-empty-icon{width:38px;height:38px;border-radius:var(--r2);background:rgba(255,255,255,.03);border:1px solid var(--b1);display:flex;align-items:center;justify-content:center;margin:0 auto 10px}
+.sb-empty p{font-family:'DM Mono',monospace;font-size:.62rem;color:var(--t3);letter-spacing:.1em;line-height:2;text-transform:uppercase}
+
+/* PERSON ROW */
+.person-row{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:var(--r2);border:1px solid transparent;cursor:pointer;transition:background .15s,border-color .15s;animation:rowIn .18s ease both}
+@keyframes rowIn{from{opacity:0;transform:translateX(-5px)}to{opacity:1;transform:translateX(0)}}
+.person-row:hover{background:rgba(255,255,255,.03);border-color:var(--b1)}
+.person-row.active{background:var(--blue-d);border-color:rgba(37,99,235,.3)}
+.pr-av{width:36px;height:36px;border-radius:var(--r3);flex-shrink:0;background:linear-gradient(135deg,var(--blue2) 0%,#1e3a8a 100%);display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-size:.72rem;font-weight:700;color:#fff;letter-spacing:.05em}
+.pr-info{flex:1;min-width:0}
+.pr-name{font-size:.875rem;font-weight:500;color:var(--t1);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pr-meta{font-family:'DM Mono',monospace;font-size:.58rem;color:var(--t3);letter-spacing:.04em;margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pr-chips{display:flex;gap:3px;flex-wrap:wrap;flex-shrink:0}
+
+/* ZAAK ROW */
+.zaak-row{display:flex;align-items:flex-start;gap:10px;padding:9px 10px;border-radius:var(--r2);border:1px solid transparent;cursor:pointer;transition:background .15s,border-color .15s;animation:rowIn .18s ease both}
+.zaak-row:hover{background:rgba(255,255,255,.03);border-color:var(--b1)}
+.zaak-row.active{background:var(--blue-d);border-color:rgba(37,99,235,.3)}
+.zaak-icon{width:36px;height:36px;border-radius:var(--r3);flex-shrink:0;background:linear-gradient(135deg,var(--purple) 0%,#4c1d95 100%);display:flex;align-items:center;justify-content:center;color:#fff}
+.zaak-info{flex:1;min-width:0}
+.zaak-title{font-size:.875rem;font-weight:500;color:var(--t1);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.zaak-meta{font-family:'DM Mono',monospace;font-size:.58rem;color:var(--t3);letter-spacing:.04em;margin-top:1px}
+
+/* MAIN */
+#main{flex:1;overflow-y:auto;display:flex;flex-direction:column}
+.main-empty{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:3rem;text-align:center}
+.main-empty-icon{width:52px;height:52px;border-radius:var(--r);background:rgba(255,255,255,.03);border:1px solid var(--b1);display:flex;align-items:center;justify-content:center;margin:0 auto}
+.main-empty h2{font-family:'Syne',sans-serif;font-size:1rem;font-weight:700;color:var(--t2);letter-spacing:.04em}
+.main-empty p{font-family:'DM Mono',monospace;font-size:.62rem;color:var(--t3);letter-spacing:.08em;line-height:2;text-transform:uppercase}
+
+/* DOSSIER */
+.dossier{padding:1.5rem;max-width:900px;width:100%;animation:fadeUp .25s ease both}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.dos-topbar{display:flex;align-items:flex-start;justify-content:space-between;gap:1rem;margin-bottom:1.25rem;flex-wrap:wrap}
+.dos-name-row{display:flex;align-items:center;gap:8px}
+.dos-name{font-family:'Syne',sans-serif;font-size:1.75rem;font-weight:800;color:var(--t1);letter-spacing:-.01em;line-height:1}
+.icon-btn{width:28px;height:28px;border-radius:var(--r3);border:1px solid var(--b1);color:var(--t3);display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:background .15s,color .15s,border-color .15s}
+.icon-btn:hover{background:var(--blue-d);color:var(--blue3);border-color:rgba(37,99,235,.3)}
+.dos-id{font-family:'DM Mono',monospace;font-size:.6rem;color:var(--t3);letter-spacing:.15em;margin-top:3px}
+.dos-chips{display:flex;gap:5px;flex-wrap:wrap;margin-top:8px}
+.dos-actions{display:flex;gap:6px;flex-wrap:wrap}
+
+/* STATUS CHIP (persoon status) */
+.status-vrij{background:rgba(21,128,61,.15);color:#4ade80;border:1px solid rgba(21,128,61,.3)}
+.status-opgepakt{background:rgba(220,38,38,.15);color:#f87171;border:1px solid rgba(220,38,38,.3)}
+.status-voortvluchtig{background:rgba(180,83,9,.15);color:#fb923c;border:1px solid rgba(180,83,9,.3)}
+
+/* INFO GRID */
+.info-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:1.25rem}
+.info-block{background:var(--s2);border:1px solid var(--b1);border-radius:var(--r2);padding:10px 12px}
+.info-label{font-family:'DM Mono',monospace;font-size:.56rem;color:var(--t3);letter-spacing:.18em;text-transform:uppercase;margin-bottom:3px}
+.info-val{font-size:.9rem;font-weight:500;color:var(--t1)}
+.info-val.grn{color:#4ade80}
+.info-val.red{color:#f87171}
+.info-val.mut{color:var(--t3)}
+.info-val.gld{color:#f0b429}
+.plaat-row{display:flex;align-items:center;gap:6px}
+.plaat-tag{font-family:'DM Mono',monospace;font-size:.8rem;font-weight:500;color:var(--t1);background:var(--s3);border:1px solid var(--b2);border-radius:4px;padding:1px 8px;letter-spacing:.1em}
+.plaat-none{font-size:.85rem;color:var(--t3)}
+
+/* SECTION */
+.section{margin-bottom:1.25rem}
+.section-hdr{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.section-title{font-family:'DM Mono',monospace;font-size:.6rem;color:var(--t3);letter-spacing:.2em;text-transform:uppercase}
+.section-title::after{content:'';display:inline-block;width:60px;height:1px;background:var(--b1);vertical-align:middle;margin-left:8px}
+.rec-row{display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--s2);border:1px solid var(--b1);border-radius:var(--r2);margin-bottom:5px;transition:border-color .15s;position:relative}
+.rec-row:hover{border-color:var(--b2)}
+.rec-dot{width:3px;align-self:stretch;border-radius:3px;flex-shrink:0}
+.d-gold{background:#ca9a3c;box-shadow:0 0 5px rgba(202,154,60,.4)}
+.d-red{background:#dc2626;box-shadow:0 0 5px rgba(220,38,38,.4)}
+.d-blue{background:#3b82f6;box-shadow:0 0 5px rgba(59,130,246,.4)}
+.d-purple{background:#7c3aed;box-shadow:0 0 5px rgba(124,58,237,.4)}
+.rec-body{flex:1;min-width:0}
+.rec-reden{font-size:.875rem;color:var(--t1);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rec-datum{font-family:'DM Mono',monospace;font-size:.58rem;color:var(--t3);margin-top:1px}
+.rec-bedrag{font-family:'DM Mono',monospace;font-size:.8rem;color:#f0b429;flex-shrink:0;margin-right:34px}
+.rec-del{position:absolute;right:8px;top:50%;transform:translateY(-50%);width:24px;height:24px;border-radius:5px;border:1px solid transparent;color:var(--t3);display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity .15s,background .15s,color .15s,border-color .15s}
+.rec-row:hover .rec-del{opacity:1}
+.rec-del:hover{background:var(--red-d);color:#f87171;border-color:rgba(220,38,38,.25)}
+.no-rec{font-family:'DM Mono',monospace;font-size:.62rem;color:var(--t3);padding:8px 0;letter-spacing:.08em}
+
+/* ZAKEN CARDS */
+.zaak-card{background:var(--s2);border:1px solid var(--b1);border-radius:var(--r2);padding:12px 14px;margin-bottom:8px;cursor:pointer;transition:border-color .15s}
+.zaak-card:hover{border-color:var(--blue2)}
+.zaak-card-top{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:6px}
+.zaak-card-num{font-family:'DM Mono',monospace;font-size:.6rem;color:var(--t3);letter-spacing:.12em}
+.zaak-card-title{font-size:.9rem;font-weight:500;color:var(--t1);margin-top:2px}
+.zaak-card-betrokkenen{display:flex;gap:4px;flex-wrap:wrap;margin-top:6px}
+.zaak-betrokkene-tag{font-family:'DM Mono',monospace;font-size:.6rem;color:var(--t2);background:rgba(255,255,255,.04);border:1px solid var(--b1);border-radius:4px;padding:1px 6px;cursor:pointer;transition:background .15s,color .15s}
+.zaak-betrokkene-tag:hover{background:var(--blue-d);color:var(--blue3)}
+
+/* CHIPS */
+.chip{display:inline-flex;align-items:center;gap:4px;font-family:'DM Mono',monospace;font-size:.58rem;font-weight:500;padding:2px 7px;border-radius:100px;letter-spacing:.04em;white-space:nowrap}
+.c-blue{background:var(--blue-d);color:#60a5fa;border:1px solid rgba(37,99,235,.22)}
+.c-red{background:var(--red-d);color:#f87171;border:1px solid rgba(220,38,38,.22)}
+.c-amber{background:var(--amber-d);color:#fbbf24;border:1px solid rgba(180,83,9,.22)}
+.c-gold{background:var(--gold-d);color:#f0b429;border:1px solid rgba(202,154,60,.22)}
+.c-green{background:var(--green-d);color:#4ade80;border:1px solid rgba(21,128,61,.22)}
+.c-purple{background:var(--purple-d);color:#a78bfa;border:1px solid rgba(124,58,237,.22)}
+.c-muted{background:rgba(61,82,112,.18);color:var(--t3);border:1px solid rgba(61,82,112,.25)}
+
+/* BUTTONS */
+.btn{display:inline-flex;align-items:center;gap:6px;font-family:'DM Sans',sans-serif;font-size:.82rem;font-weight:500;height:34px;padding:0 12px;border-radius:var(--r2);border:none;cursor:pointer;transition:background .15s,box-shadow .15s,transform .1s;white-space:nowrap;letter-spacing:.01em}
+.btn:active{transform:scale(.97)}
+.btn-primary{background:var(--blue2);color:#fff}
+.btn-primary:hover{background:var(--blue3);box-shadow:0 4px 14px var(--blue-g)}
+.btn-ghost{background:rgba(255,255,255,.04);color:var(--t2);border:1px solid var(--b1)}
+.btn-ghost:hover{background:rgba(255,255,255,.07);border-color:var(--b2)}
+.btn-danger{background:var(--red-d);color:#f87171;border:1px solid rgba(220,38,38,.22)}
+.btn-danger:hover{background:rgba(220,38,38,.22)}
+.btn-amber{background:var(--amber-d);color:#fbbf24;border:1px solid rgba(180,83,9,.22)}
+.btn-amber:hover{background:rgba(180,83,9,.22)}
+.btn-purple{background:var(--purple-d);color:#a78bfa;border:1px solid rgba(124,58,237,.22)}
+.btn-purple:hover{background:rgba(124,58,237,.22)}
+.btn-full{width:100%;justify-content:center}
+.btn-sm{height:30px;font-size:.78rem;padding:0 10px}
+
+/* RIGHT PANEL */
+#right-panel{width:280px;flex-shrink:0;border-left:1px solid var(--b1);background:var(--s1);position:sticky;top:var(--hdr);height:calc(100vh - var(--hdr));overflow-y:auto;display:flex;flex-direction:column}
+.rp-section{border-bottom:1px solid var(--b1);padding:1rem}
+.rp-title{font-family:'DM Mono',monospace;font-size:.58rem;color:var(--t3);letter-spacing:.2em;text-transform:uppercase;margin-bottom:10px;display:flex;align-items:center;gap:6px}
+.stat-row{display:flex;align-items:center;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--b1)}
+.stat-row:last-child{border-bottom:none}
+.stat-name{font-size:.84rem;color:var(--t2)}
+.stat-val{font-family:'DM Mono',monospace;font-size:.88rem;font-weight:500}
+.sv-blue{color:var(--blue3)}.sv-gold{color:#f0b429}.sv-red{color:#f87171}.sv-amber{color:#fbbf24}.sv-purple{color:#a78bfa}
+.recent-row{display:flex;align-items:center;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--b1);cursor:pointer;transition:background .15s;border-radius:4px}
+.recent-row:last-child{border-bottom:none}
+.recent-row:hover{background:rgba(255,255,255,.02)}
+.recent-name{font-size:.84rem;color:var(--t1)}
+.recent-date{font-family:'DM Mono',monospace;font-size:.58rem;color:var(--t3)}
+.rp-qa{display:flex;flex-direction:column;gap:5px}
+
+/* FOOTER */
+footer{border-top:1px solid var(--b1);padding:.75rem 1.5rem;display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap;background:var(--s1)}
+.footer-credits{font-family:'DM Mono',monospace;font-size:.58rem;color:var(--t3);letter-spacing:.1em}
+.footer-credits strong{color:var(--t2);font-weight:500}
+.footer-ver{font-family:'DM Mono',monospace;font-size:.56rem;color:var(--t4);letter-spacing:.1em}
+
+/* OVERLAY / MODALS */
+.overlay{display:none;position:fixed;inset:0;z-index:500;background:rgba(3,6,14,.88);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);align-items:center;justify-content:center;padding:1rem}
+.overlay.open{display:flex}
+.modal{background:var(--s2);border:1px solid var(--b2);border-radius:var(--r);width:100%;max-width:460px;max-height:90vh;overflow-y:auto;box-shadow:0 24px 80px rgba(0,0,0,.7),0 0 0 1px rgba(255,255,255,.04);animation:mIn .2s cubic-bezier(.22,.68,0,1.15) both}
+.modal-lg{max-width:560px}
+@keyframes mIn{from{opacity:0;transform:scale(.95) translateY(10px)}to{opacity:1;transform:scale(1) translateY(0)}}
+.modal-sm{max-width:340px}
+.mhd{padding:14px 18px;border-bottom:1px solid var(--b1);display:flex;align-items:center;justify-content:space-between}
+.mhd-title{font-family:'Syne',sans-serif;font-size:.88rem;font-weight:700;color:var(--t1);letter-spacing:.02em}
+.m-close{width:26px;height:26px;background:rgba(255,255,255,.04);border:1px solid var(--b1);border-radius:5px;color:var(--t3);display:flex;align-items:center;justify-content:center;transition:background .15s,color .15s}
+.m-close:hover{background:var(--red-d);color:#f87171}
+.mbody{padding:16px 18px;display:flex;flex-direction:column;gap:11px}
+.mfoot{padding:11px 18px;border-top:1px solid var(--b1);display:flex;justify-content:flex-end;gap:7px;background:rgba(0,0,0,.15)}
+.form-group{display:flex;flex-direction:column;gap:4px}
+.form-row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.form-label{font-family:'DM Mono',monospace;font-size:.58rem;color:var(--t3);letter-spacing:.18em;text-transform:uppercase}
+.form-input,.form-select,.form-textarea{background:var(--s1);border:1px solid var(--b1);border-radius:var(--r2);color:var(--t1);font-size:.875rem;padding:0 11px;height:38px;outline:none;width:100%;transition:border-color .2s,box-shadow .2s;-webkit-appearance:none}
+.form-input::placeholder{color:var(--t3)}
+.form-select option{background:var(--s2)}
+.form-input:focus,.form-select:focus,.form-textarea:focus{border-color:var(--blue2);box-shadow:0 0 0 3px var(--blue-d)}
+.form-textarea{height:auto;min-height:72px;padding:9px 11px;resize:vertical}
+.form-warn{font-family:'DM Mono',monospace;font-size:.58rem;color:#f87171;display:none}
+.confirm-text{font-size:.875rem;color:var(--t2);line-height:1.7}
+
+/* betrokkenen multi-select in modal */
+.betrokkenen-list{display:flex;flex-direction:column;gap:4px;max-height:180px;overflow-y:auto;background:var(--s1);border:1px solid var(--b1);border-radius:var(--r2);padding:6px}
+.betrokkene-opt{display:flex;align-items:center;gap:8px;padding:6px 8px;border-radius:6px;cursor:pointer;transition:background .12s}
+.betrokkene-opt:hover{background:rgba(255,255,255,.04)}
+.betrokkene-opt input[type=checkbox]{width:14px;height:14px;accent-color:var(--blue2);cursor:pointer;flex-shrink:0}
+.betrokkene-opt label{font-size:.875rem;color:var(--t1);cursor:pointer;flex:1}
+
+/* MOBILE DRAWER */
+#mob-drawer{display:none;position:fixed;top:var(--hdr);bottom:0;left:0;z-index:90;width:min(320px,90vw);background:var(--s1);border-right:1px solid var(--b1);flex-direction:column;overflow:hidden;transform:translateX(-100%);transition:transform .25s ease}
+#mob-drawer.open{transform:translateX(0)}
+#mob-backdrop{display:none;position:fixed;inset:0;z-index:89;background:rgba(0,0,0,.5);top:var(--hdr)}
+#mob-backdrop.open{display:block}
+
+/* RESPONSIVE */
+@media(max-width:1100px){#right-panel{display:none}}
+@media(max-width:760px){
+  :root{--sidebar:0px}
+  #sidebar{display:none}
+  #mob-drawer{display:flex}
+  .hdr-menu-btn{display:flex}
+  .hdr-status{display:none}
+  .dossier{padding:1rem}
+  .info-grid{grid-template-columns:1fr 1fr}
+  .dos-name{font-size:1.4rem}
+  footer{flex-direction:column;align-items:flex-start;gap:.5rem}
+}
+@media(max-width:480px){
+  .info-grid{grid-template-columns:1fr}
+  .dos-actions{gap:5px}
+  .btn{font-size:.78rem;padding:0 10px}
+  .form-row2{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+<header id="header">
+  <div class="hdr-logo">
+    <button class="hdr-menu-btn icon-btn" onclick="toggleDrawer()" aria-label="Menu">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+    </button>
+    <div class="hdr-badge">
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L3 7v5c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V7L12 2z"/></svg>
+    </div>
+    <div>
+      <div class="hdr-title">Politie Systeem</div>
+      <div class="hdr-sub">Nationaal Database Netwerk</div>
+    </div>
+  </div>
+  <div class="hdr-right">
+    <div class="hdr-status"><div class="status-dot"></div>Operationeel</div>
+    <div class="hdr-clock" id="klok">00:00:00</div>
+  </div>
+</header>
+
+<div id="app">
+  <div class="page">
+    <aside id="sidebar"><div id="sb-inner"></div></aside>
+    <div id="mob-drawer"><div id="mob-inner"></div></div>
+    <div id="mob-backdrop" onclick="closeDrawer()"></div>
+
+    <main id="main">
+      <div class="main-empty" id="emptyState">
+        <div class="main-empty-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="color:var(--t3)"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        </div>
+        <h2>Geen dossier geselecteerd</h2>
+        <p>Zoek een persoon of zaak op<br>of voeg een nieuwe toe</p>
+      </div>
+      <div id="dossierWrap" style="display:none;">
+        <div class="dossier" id="dossier"></div>
+      </div>
+    </main>
+
+    <aside id="right-panel">
+      <div class="rp-section">
+        <div class="rp-title">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+          Database overzicht
+        </div>
+        <div id="statsBlock"></div>
+      </div>
+      <div class="rp-section">
+        <div class="rp-title">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          Recente registraties
+        </div>
+        <div id="recentBlock"></div>
+      </div>
+      <div class="rp-section">
+        <div class="rp-title">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+          Snelle acties
+        </div>
+        <div class="rp-qa">
+          <button class="btn btn-primary btn-full" onclick="openM('mAdd')">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Persoon registreren
+          </button>
+          <button class="btn btn-purple btn-full" onclick="openM('mZaak')">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Zaak aanmaken
+          </button>
+          <button class="btn btn-ghost btn-full" onclick="toonTab('personen')">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+            Alle personen
+          </button>
+          <button class="btn btn-ghost btn-full" onclick="toonTab('zaken')">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg>
+            Alle zaken
+          </button>
+        </div>
+      </div>
+    </aside>
+  </div>
+
+  <footer>
+    <div class="footer-credits">Ontwikkeld door <strong>Ilian</strong> &nbsp;&middot;&nbsp; Politie Systeem &copy; 2025</div>
+    <div class="footer-right"><span class="footer-ver">v3.0 — Nationaal Database Netwerk</span></div>
+  </footer>
+</div>
+
+<!-- ═══════════════════ MODALS ═══════════════════════════════════════ -->
+
+<!-- Persoon toevoegen -->
+<div class="overlay" id="mAdd">
+  <div class="modal">
+    <div class="mhd"><span class="mhd-title">Persoon registreren</span><button class="m-close" onclick="closeM('mAdd')"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>
+    <div class="mbody">
+      <div class="form-group"><label class="form-label">Volledige naam *</label><input type="text" class="form-input" id="aNaam" placeholder="Jan de Vries" autocomplete="off"><span class="form-warn" id="aNaamW">Naam is verplicht</span></div>
+      <div class="form-row2">
+        <div class="form-group"><label class="form-label">Geboortedatum</label><input type="date" class="form-input" id="aGeb"></div>
+        <div class="form-group"><label class="form-label">Nationaliteit</label><input type="text" class="form-input" id="aNat" placeholder="Nederlands"></div>
+      </div>
+      <div class="form-row2">
+        <div class="form-group"><label class="form-label">Rijbewijs</label>
+          <select class="form-select" id="aRij">
+            <option value="geldig">Geldig rijbewijs</option>
+            <option value="ingetrokken">Ingetrokken rijbewijs</option>
+            <option value="geen">Geen rijbewijs</option>
+          </select>
+        </div>
+        <div class="form-group"><label class="form-label">Status</label>
+          <select class="form-select" id="aStatus">
+            <option value="vrij">Vrij</option>
+            <option value="opgepakt">Opgepakt / In hechtenis</option>
+            <option value="voortvluchtig">Voortvluchtig</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group"><label class="form-label">Nummerplaat (optioneel)</label><input type="text" class="form-input" id="aPlaat" placeholder="1-ABC-234" style="text-transform:uppercase;letter-spacing:.1em" autocomplete="off"></div>
+      <div class="form-group"><label class="form-label">Notitie (optioneel)</label><textarea class="form-textarea" id="aNote" placeholder="Initiële opmerking..."></textarea></div>
+    </div>
+    <div class="mfoot"><button class="btn btn-ghost" onclick="closeM('mAdd')">Annuleren</button><button class="btn btn-primary" onclick="doAdd()">Opslaan</button></div>
+  </div>
+</div>
+
+<!-- Record toevoegen -->
+<div class="overlay" id="mRec">
+  <div class="modal">
+    <div class="mhd"><span class="mhd-title" id="mRecTitle">Record toevoegen</span><button class="m-close" onclick="closeM('mRec')"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>
+    <div class="mbody">
+      <div class="form-group"><label class="form-label">Type</label>
+        <select class="form-select" id="rType" onchange="toggleBedrag()">
+          <option value="boete">Boete</option>
+          <option value="arrest">Arrestatie</option>
+          <option value="waarschuwing">Waarschuwing</option>
+          <option value="notitie">Notitie</option>
+        </select>
+      </div>
+      <div class="form-group"><label class="form-label">Omschrijving / reden *</label><input type="text" class="form-input" id="rReden" placeholder="Bijv. Door rood rijden..." autocomplete="off"></div>
+      <div class="form-group" id="rBedragGroup"><label class="form-label">Bedrag (euro)</label><input type="number" class="form-input" id="rBedrag" placeholder="500" min="0"></div>
+    </div>
+    <div class="mfoot"><button class="btn btn-ghost" onclick="closeM('mRec')">Annuleren</button><button class="btn btn-primary" onclick="doRec()">Toevoegen</button></div>
+  </div>
+</div>
+
+<!-- Status wijzigen -->
+<div class="overlay" id="mStatus">
+  <div class="modal modal-sm">
+    <div class="mhd"><span class="mhd-title">Status wijzigen</span><button class="m-close" onclick="closeM('mStatus')"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>
+    <div class="mbody">
+      <div class="form-group"><label class="form-label">Status persoon</label>
+        <select class="form-select" id="sStatus">
+          <option value="vrij">Vrij</option>
+          <option value="opgepakt">Opgepakt / In hechtenis</option>
+          <option value="voortvluchtig">Voortvluchtig</option>
+        </select>
+      </div>
+    </div>
+    <div class="mfoot"><button class="btn btn-ghost" onclick="closeM('mStatus')">Annuleren</button><button class="btn btn-primary" onclick="doStatus()">Opslaan</button></div>
+  </div>
+</div>
+
+<!-- Naam bewerken -->
+<div class="overlay" id="mNaam">
+  <div class="modal modal-sm">
+    <div class="mhd"><span class="mhd-title">Naam bewerken</span><button class="m-close" onclick="closeM('mNaam')"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>
+    <div class="mbody"><div class="form-group"><label class="form-label">Naam *</label><input type="text" class="form-input" id="nNaam" autocomplete="off"><span class="form-warn" id="nNaamW">Naam is verplicht</span></div></div>
+    <div class="mfoot"><button class="btn btn-ghost" onclick="closeM('mNaam')">Annuleren</button><button class="btn btn-primary" onclick="doNaam()">Opslaan</button></div>
+  </div>
+</div>
+
+<!-- Rijbewijs wijzigen -->
+<div class="overlay" id="mRij">
+  <div class="modal modal-sm">
+    <div class="mhd"><span class="mhd-title">Rijbewijs wijzigen</span><button class="m-close" onclick="closeM('mRij')"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>
+    <div class="mbody"><div class="form-group"><label class="form-label">Status</label><select class="form-select" id="rijStatus"><option value="geldig">Geldig rijbewijs</option><option value="ingetrokken">Ingetrokken rijbewijs</option><option value="geen">Geen rijbewijs</option></select></div></div>
+    <div class="mfoot"><button class="btn btn-ghost" onclick="closeM('mRij')">Annuleren</button><button class="btn btn-primary" onclick="doRij()">Opslaan</button></div>
+  </div>
+</div>
+
+<!-- Nummerplaat wijzigen -->
+<div class="overlay" id="mPlaat">
+  <div class="modal modal-sm">
+    <div class="mhd"><span class="mhd-title" id="mPlaatTitle">Nummerplaat</span><button class="m-close" onclick="closeM('mPlaat')"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>
+    <div class="mbody"><div class="form-group"><label class="form-label">Nummerplaat (leeg = geen)</label><input type="text" class="form-input" id="pPlaat" placeholder="1-ABC-234" style="text-transform:uppercase;letter-spacing:.1em" autocomplete="off"></div></div>
+    <div class="mfoot"><button class="btn btn-ghost" onclick="closeM('mPlaat')">Annuleren</button><button class="btn btn-primary" onclick="doPlaat()">Opslaan</button></div>
+  </div>
+</div>
+
+<!-- Zaak aanmaken -->
+<div class="overlay" id="mZaak">
+  <div class="modal modal-lg">
+    <div class="mhd"><span class="mhd-title" id="mZaakTitle">Zaak aanmaken</span><button class="m-close" onclick="closeM('mZaak')"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>
+    <div class="mbody">
+      <div class="form-group"><label class="form-label">Titel / naam zaak *</label><input type="text" class="form-input" id="zTitel" placeholder="Bijv. Gewapende overval Kerkstraat" autocomplete="off"><span class="form-warn" id="zTitelW">Titel is verplicht</span></div>
+      <div class="form-row2">
+        <div class="form-group"><label class="form-label">Zaaktype</label>
+          <select class="form-select" id="zType">
+            <option value="misdrijf">Misdrijf</option>
+            <option value="overtreding">Overtreding</option>
+            <option value="vermissing">Vermissing</option>
+            <option value="onderzoek">Onderzoek</option>
+            <option value="incident">Incident</option>
+          </select>
+        </div>
+        <div class="form-group"><label class="form-label">Status zaak</label>
+          <select class="form-select" id="zStatus">
+            <option value="open">Open</option>
+            <option value="lopend">Lopend onderzoek</option>
+            <option value="gesloten">Gesloten</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group"><label class="form-label">Omschrijving</label><textarea class="form-textarea" id="zOmschrijving" placeholder="Korte omschrijving van de zaak..."></textarea></div>
+      <div class="form-group">
+        <label class="form-label">Betrokkenen (selecteer personen)</label>
+        <div class="betrokkenen-list" id="betrokkenenList"></div>
+      </div>
+    </div>
+    <div class="mfoot"><button class="btn btn-ghost" onclick="closeM('mZaak')">Annuleren</button><button class="btn btn-primary" onclick="doZaak()">Opslaan</button></div>
+  </div>
+</div>
+
+<!-- Zaak bewerken (status / betrokkenen) -->
+<div class="overlay" id="mZaakEdit">
+  <div class="modal modal-lg">
+    <div class="mhd"><span class="mhd-title">Zaak bewerken</span><button class="m-close" onclick="closeM('mZaakEdit')"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>
+    <div class="mbody">
+      <div class="form-group"><label class="form-label">Titel / naam zaak *</label><input type="text" class="form-input" id="zeTitle" autocomplete="off"></div>
+      <div class="form-row2">
+        <div class="form-group"><label class="form-label">Zaaktype</label>
+          <select class="form-select" id="zeType">
+            <option value="misdrijf">Misdrijf</option>
+            <option value="overtreding">Overtreding</option>
+            <option value="vermissing">Vermissing</option>
+            <option value="onderzoek">Onderzoek</option>
+            <option value="incident">Incident</option>
+          </select>
+        </div>
+        <div class="form-group"><label class="form-label">Status zaak</label>
+          <select class="form-select" id="zeStatus">
+            <option value="open">Open</option>
+            <option value="lopend">Lopend onderzoek</option>
+            <option value="gesloten">Gesloten</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group"><label class="form-label">Omschrijving</label><textarea class="form-textarea" id="zeOmschrijving"></textarea></div>
+      <div class="form-group">
+        <label class="form-label">Betrokkenen</label>
+        <div class="betrokkenen-list" id="betrokkenenEditList"></div>
+      </div>
+    </div>
+    <div class="mfoot"><button class="btn btn-ghost" onclick="closeM('mZaakEdit')">Annuleren</button><button class="btn btn-primary" onclick="doZaakEdit()">Opslaan</button></div>
+  </div>
+</div>
+
+<!-- Bevestigen -->
+<div class="overlay" id="mConfirm">
+  <div class="modal modal-sm">
+    <div class="mhd"><span class="mhd-title">Bevestigen</span></div>
+    <div class="mbody"><p class="confirm-text" id="confirmText"></p></div>
+    <div class="mfoot"><button class="btn btn-ghost" onclick="confirmNee()">Annuleren</button><button class="btn btn-danger" onclick="confirmJa()">Verwijderen</button></div>
+  </div>
+</div>
+
+<!-- ═══════════════════ JAVASCRIPT ═══════════════════════════════════ -->
+<script>
+'use strict';
+
+// ── STORAGE ───────────────────────────────────────────────────────────
+var PKEY = 'politie_personen_v3';
+var ZKEY = 'politie_zaken_v3';
+
+function loadDB()  { try { return JSON.parse(localStorage.getItem(PKEY)||'[]'); } catch(e) { return []; } }
+function loadZDB() { try { return JSON.parse(localStorage.getItem(ZKEY)||'[]'); } catch(e) { return []; } }
+function saveDB()  { try { localStorage.setItem(PKEY, JSON.stringify(db)); } catch(e) { alert('Opslaan mislukt!'); } }
+function saveZDB() { try { localStorage.setItem(ZKEY, JSON.stringify(zdb)); } catch(e) { alert('Opslaan mislukt!'); } }
+
+var db  = loadDB();
+var zdb = loadZDB();
+
+var activeId      = null;
+var activeZaakId  = null;
+var activePid     = null;   // voor record/naam/rij/plaat/status modals
+var confirmCb     = null;
+var activeTab     = 'personen';
+var searchMode    = 'naam';  // 'naam' of 'plaat'
+var lastQuery     = '';
+
+// ── HELPERS ───────────────────────────────────────────────────────────
+function uid(prefix) { return (prefix||'X') + Date.now().toString(36).toUpperCase() + Math.random().toString(36).slice(2,5).toUpperCase(); }
+function today()  { return new Date().toISOString().split('T')[0]; }
+function fDate(d) { return d ? new Date(d).toLocaleDateString('nl-NL') : '—'; }
+function initials(n) { return String(n).split(' ').map(function(w){ return w[0]||''; }).join('').slice(0,2).toUpperCase(); }
+function findP(id) { for(var i=0;i<db.length;i++) { if(db[i].id===id) return db[i]; } return null; }
+function findZ(id) { for(var i=0;i<zdb.length;i++) { if(zdb[i].id===id) return zdb[i]; } return null; }
+
+function esc(s) {
+  return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
+
+// ── KLOK ──────────────────────────────────────────────────────────────
+(function tick() {
+  var el = document.getElementById('klok');
+  if(el) el.textContent = new Date().toLocaleTimeString('nl-NL',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+  setTimeout(tick, 1000);
+})();
+
+// ── ICONS ─────────────────────────────────────────────────────────────
+var I = {
+  boete:  '<svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>',
+  arrest: '<svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>',
+  warn:   '<svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>',
+  rij:    '<svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="3" width="15" height="13" rx="1"/><path d="M16 8h4l3 3v5h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>',
+  edit:   '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>',
+  del:    '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>',
+  plus:   '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>',
+  search: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>',
+  zaak:   '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg>',
+  lock:   '<svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>',
+  run:    '<svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="13 17 18 12 13 7"/><polyline points="6 17 11 12 6 7"/></svg>',
+};
+
+// ── STATUS HELPERS ────────────────────────────────────────────────────
+function statusChip(p) {
+  var s = p.status || 'vrij';
+  if(s==='opgepakt')     return '<span class="chip status-opgepakt">'     + I.lock + ' Opgepakt</span>';
+  if(s==='voortvluchtig') return '<span class="chip status-voortvluchtig">' + I.run  + ' Voortvluchtig</span>';
+  return '<span class="chip status-vrij">Vrij</span>';
+}
+
+function zaakStatusChip(z) {
+  if(z.status==='gesloten') return '<span class="chip c-muted">Gesloten</span>';
+  if(z.status==='lopend')   return '<span class="chip c-blue">Lopend onderzoek</span>';
+  return '<span class="chip c-amber">Open</span>';
+}
+
+function zaakTypeChip(z) {
+  var map = {misdrijf:'c-red',overtreding:'c-gold',vermissing:'c-purple',onderzoek:'c-blue',incident:'c-amber'};
+  var cls = map[z.type] || 'c-muted';
+  return '<span class="chip ' + cls + '">' + esc(z.type||'') + '</span>';
+}
+
+// ── PERSON CHIPS ──────────────────────────────────────────────────────
+function chips(p) {
+  var rec = p.records||[];
+  var bo = rec.filter(function(r){ return r.type==='boete'; }).length;
+  var ar = rec.filter(function(r){ return r.type==='arrest'; }).length;
+  var wa = rec.filter(function(r){ return r.type==='waarschuwing'; }).length;
+  var out = '';
+  if(ar) out += '<span class="chip c-red">'   + I.arrest + ' ' + ar + '</span>';
+  if(bo) out += '<span class="chip c-gold">'  + I.boete  + ' ' + bo + '</span>';
+  if(wa) out += '<span class="chip c-amber">' + I.warn   + ' ' + wa + '</span>';
+  if(p.rijbewijs==='ingetrokken') out += '<span class="chip c-red">' + I.rij + '</span>';
+  var s = p.status||'vrij';
+  if(s==='opgepakt') out += '<span class="chip status-opgepakt">' + I.lock + '</span>';
+  if(s==='voortvluchtig') out += '<span class="chip status-voortvluchtig">' + I.run + '</span>';
+  return out || '<span class="chip c-muted">Schoon</span>';
+}
+
+// ── TAB SWITCHING ─────────────────────────────────────────────────────
+function toonTab(tab) {
+  activeTab = tab;
+  lastQuery = '';
+  renderSidebar('');
+  closeDrawer();
+}
+
+// ── SIDEBAR ───────────────────────────────────────────────────────────
+function renderSidebar(query) {
+  if(query === undefined) query = lastQuery;
+  lastQuery = query;
+  var html = buildSidebar(query);
+  var sb = document.getElementById('sb-inner');
+  var mob = document.getElementById('mob-inner');
+  if(sb) sb.innerHTML = html;
+  if(mob) mob.innerHTML = html;
+}
+
+function buildSidebar(query) {
+  var q = (query||'').trim();
+  var h = '';
+
+  // Tab bar
+  var pCount = db.length;
+  var zCount = zdb.length;
+  h += '<div class="nav-tabs">';
+  h += '<div class="nav-tab' + (activeTab==='personen'?' active':'') + '" onclick="toonTab(\'personen\')">';
+  h += '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>';
+  h += 'Personen <span class="nav-tab-badge">' + pCount + '</span></div>';
+  h += '<div class="nav-tab' + (activeTab==='zaken'?' active':'') + '" onclick="toonTab(\'zaken\')">';
+  h += '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg>';
+  h += 'Zaken <span class="nav-tab-badge">' + zCount + '</span></div>';
+  h += '</div>';
+
+  if(activeTab === 'personen') {
+    h += buildPersonenSidebar(q);
+  } else {
+    h += buildZakenSidebar(q);
+  }
+  return h;
+}
+
+function buildPersonenSidebar(q) {
+  var h = '';
+  h += '<div class="sb-search">';
+  h += '<div class="sb-search-label">Burger opzoeken</div>';
+  h += '<div class="sb-search-row">';
+  h += '<div class="sb-search-box"><span class="sb-search-ico">' + I.search + '</span>';
+  h += '<input type="text" class="sb-input" id="sbInput" placeholder="' + (searchMode==='plaat'?'Nummerplaat...':'Naam invoeren...') + '" value="' + esc(q) + '" oninput="onSearch(this.value)">';
+  h += '</div>';
+  h += '<button class="sb-add-btn btn" onclick="openM(\'mAdd\')">' + I.plus + 'Nieuw</button>';
+  h += '</div>';
+  h += '<div class="sb-search-mode">';
+  h += '<button class="sb-mode-btn' + (searchMode==='naam'?' active':'') + '" onclick="setSearchMode(\'naam\')">Op naam</button>';
+  h += '<button class="sb-mode-btn' + (searchMode==='plaat'?' active':'') + '" onclick="setSearchMode(\'plaat\')">Op nummerplaat</button>';
+  h += '</div></div>';
+
+  h += '<div class="sb-results">';
+
+  if(!q) {
+    if(!db.length) {
+      h += '<div class="sb-empty"><div class="sb-empty-icon">' + I.search + '</div><p>Database leeg</p></div>';
+    } else {
+      h += '<div class="sb-count">' + db.length + ' personen totaal</div>';
+      db.forEach(function(p, i) {
+        h += personRow(p, i);
+      });
+    }
+  } else {
+    var results;
+    if(searchMode === 'plaat') {
+      var ql = q.toLowerCase().replace(/[-\s]/g,'');
+      results = db.filter(function(p){ return p.nummerplaat && p.nummerplaat.toLowerCase().replace(/[-\s]/g,'').indexOf(ql) !== -1; });
+    } else {
+      var ql2 = q.toLowerCase();
+      results = db.filter(function(p){ return p.naam.toLowerCase().indexOf(ql2) !== -1; });
+    }
+
+    if(!results.length) {
+      h += '<div class="sb-count">0 resultaten</div>';
+      h += '<div class="sb-empty"><div class="sb-empty-icon">' + I.del + '</div><p>Niet gevonden</p></div>';
+      h += '</div>';
+      h += '<div class="sb-nf show"><p>' + (searchMode==='plaat'?'Nummerplaat niet gevonden.':'Persoon niet gevonden.') + '</p>';
+      if(searchMode==='naam') h += '<button class="btn btn-primary btn-sm btn-full sb-nf-btn" onclick="openAddWithName()">' + I.plus + ' Toevoegen</button>';
+      h += '</div>';
+      return h;
+    }
+
+    h += '<div class="sb-count">' + results.length + ' resultaat' + (results.length!==1?'en':'') + '</div>';
+    results.forEach(function(p, i) { h += personRow(p, i); });
+  }
+
+  h += '</div>';
+  return h;
+}
+
+function personRow(p, i) {
+  var act = p.id === activeId ? ' active' : '';
+  var h = '<div class="person-row' + act + '" onclick="selectPerson(\'' + p.id + '\')" style="animation-delay:' + (i*0.04) + 's">';
+  h += '<div class="pr-av">' + initials(p.naam) + '</div>';
+  h += '<div class="pr-info">';
+  h += '<div class="pr-name">' + esc(p.naam) + '</div>';
+  h += '<div class="pr-meta">' + fDate(p.aangemaakt) + (p.nummerplaat?' &middot; '+esc(p.nummerplaat):'') + '</div>';
+  h += '</div>';
+  h += '<div class="pr-chips">' + chips(p) + '</div>';
+  h += '</div>';
+  return h;
+}
+
+function buildZakenSidebar(q) {
+  var h = '';
+  h += '<div class="sb-search">';
+  h += '<div class="sb-search-label">Zaak opzoeken</div>';
+  h += '<div class="sb-search-row">';
+  h += '<div class="sb-search-box"><span class="sb-search-ico">' + I.search + '</span>';
+  h += '<input type="text" class="sb-input" id="sbInput" placeholder="Zaaktitel..." value="' + esc(q) + '" oninput="onSearch(this.value)">';
+  h += '</div>';
+  h += '<button class="sb-add-btn btn" onclick="openM(\'mZaak\')">' + I.plus + 'Nieuw</button>';
+  h += '</div></div>';
+
+  h += '<div class="sb-results">';
+  var list = q ? zdb.filter(function(z){ return z.titel.toLowerCase().indexOf(q.toLowerCase())!==-1; }) : zdb;
+
+  if(!list.length) {
+    h += '<div class="sb-empty"><div class="sb-empty-icon">' + I.zaak + '</div><p>' + (q?'Niet gevonden':'Geen zaken<br>aangemaakt') + '</p></div>';
+  } else {
+    h += '<div class="sb-count">' + list.length + ' zaak' + (list.length!==1?'en':'') + '</div>';
+    list.forEach(function(z, i) {
+      var act = z.id===activeZaakId?' active':'';
+      h += '<div class="zaak-row' + act + '" onclick="selectZaak(\'' + z.id + '\')" style="animation-delay:' + (i*0.04) + 's">';
+      h += '<div class="zaak-icon">' + I.zaak + '</div>';
+      h += '<div class="zaak-info">';
+      h += '<div class="zaak-title">' + esc(z.titel) + '</div>';
+      h += '<div class="zaak-meta">' + fDate(z.aangemaakt) + ' &middot; ' + (z.betrokkenen||[]).length + ' betrokkene(n)</div>';
+      h += '</div>';
+      h += zaakStatusChip(z);
+      h += '</div>';
+    });
+  }
+  h += '</div>';
+  return h;
+}
+
+function setSearchMode(mode) {
+  searchMode = mode;
+  renderSidebar('');
+  setTimeout(function(){ var i=document.getElementById('sbInput'); if(i)i.focus(); }, 50);
+}
+
+function onSearch(val) { renderSidebar(val); }
+
+function openAddWithName() {
+  var inp = document.getElementById('sbInput');
+  var val = inp ? inp.value.trim() : '';
+  document.getElementById('aNaam').value = val;
+  openM('mAdd');
+}
+
+// ── STATS & RECENT ────────────────────────────────────────────────────
+function renderStats() {
+  var bo=0,ar=0,wa=0,ri=0,opgepakt=0,voortvluchtig=0;
+  db.forEach(function(p) {
+    (p.records||[]).forEach(function(r) {
+      if(r.type==='boete') bo++;
+      if(r.type==='arrest') ar++;
+      if(r.type==='waarschuwing') wa++;
+    });
+    if(p.rijbewijs==='ingetrokken') ri++;
+    if(p.status==='opgepakt') opgepakt++;
+    if(p.status==='voortvluchtig') voortvluchtig++;
+  });
+  function sr(lbl,val,cls) { return '<div class="stat-row"><span class="stat-name">'+lbl+'</span><span class="stat-val '+cls+'">'+val+'</span></div>'; }
+  var h = '';
+  h += sr('Personen', db.length, 'sv-blue');
+  h += sr('Boetes', bo, 'sv-gold');
+  h += sr('Arrestaties', ar, 'sv-red');
+  h += sr('Waarschuwingen', wa, 'sv-amber');
+  h += sr('Rijbewijs ingetrokken', ri, 'sv-red');
+  h += sr('Opgepakt', opgepakt, 'sv-red');
+  h += sr('Voortvluchtig', voortvluchtig, 'sv-amber');
+  h += sr('Open zaken', zdb.filter(function(z){ return z.status!=='gesloten'; }).length, 'sv-purple');
+  var el = document.getElementById('statsBlock'); if(el) el.innerHTML = h;
+}
+
+function renderRecent() {
+  var el = document.getElementById('recentBlock'); if(!el) return;
+  var r = db.slice().sort(function(a,b){ return new Date(b.aangemaakt)-new Date(a.aangemaakt); }).slice(0,5);
+  if(!r.length) { el.innerHTML='<div style="font-family:DM Mono,monospace;font-size:.62rem;color:var(--t3);padding:4px 0">Geen personen</div>'; return; }
+  el.innerHTML = r.map(function(p) {
+    return '<div class="recent-row" onclick="selectPerson(\''+p.id+'\')">'
+      +'<span class="recent-name">'+esc(p.naam)+'</span>'
+      +'<span class="recent-date">'+fDate(p.aangemaakt)+'</span></div>';
+  }).join('');
+}
+
+function refreshAll() {
+  renderSidebar();
+  renderStats();
+  renderRecent();
+}
+
+// ── SELECT PERSOON ────────────────────────────────────────────────────
+function selectPerson(id) {
+  activeId = id;
+  activeZaakId = null;
+  var p = findP(id); if(!p) return;
+  renderSidebar();
+  closeDrawer();
+  showDossier(buildDossier(p));
+}
+
+function buildDossier(p) {
+  var rec = p.records||[];
+  var bo = rec.filter(function(r){ return r.type==='boete'; });
+  var ar = rec.filter(function(r){ return r.type==='arrest'; });
+  var wa = rec.filter(function(r){ return r.type==='waarschuwing'; });
+  var no = rec.filter(function(r){ return r.type==='notitie'; });
+  var totaal = bo.reduce(function(s,r){ return s+(parseFloat(r.bedrag)||0); }, 0);
+
+  var dosStatus, dosCls;
+  if(ar.length)           { dosStatus='Bekende crimineel'; dosCls='c-red'; }
+  else if(bo.length||wa.length) { dosStatus='Bekende overtreder'; dosCls='c-amber'; }
+  else                         { dosStatus='Schoon dossier';    dosCls='c-green'; }
+
+  var rKls = p.rijbewijs==='geldig'?'grn':p.rijbewijs==='ingetrokken'?'red':'mut';
+  var rTxt = p.rijbewijs==='geldig'?'Geldig':p.rijbewijs==='ingetrokken'?'Ingetrokken':'Geen';
+
+  var plaatHtml = p.nummerplaat
+    ? '<span class="plaat-tag">'+esc(p.nummerplaat)+'</span>'
+    : '<span class="plaat-none">Niet ingesteld</span>';
+
+  // Gekoppelde zaken
+  var gekoppeldeZaken = zdb.filter(function(z){ return (z.betrokkenen||[]).indexOf(p.id)!==-1; });
+
+  var h = '<div class="dos-topbar">';
+  h += '<div>';
+  h += '<div class="dos-name-row"><div class="dos-name">'+esc(p.naam)+'</div>';
+  h += '<button class="icon-btn" onclick="openEditNaam(\''+p.id+'\')" title="Naam bewerken">'+I.edit+'</button></div>';
+  h += '<div class="dos-id">ID: '+p.id+' &nbsp;&middot;&nbsp; Geregistreerd: '+fDate(p.aangemaakt)+'</div>';
+  h += '<div class="dos-chips">'+statusChip(p)+'<span class="chip '+dosCls+'">'+dosStatus+'</span>'+chips(p)+'</div>';
+  h += '</div>';
+  h += '<div class="dos-actions">';
+  h += '<button class="btn btn-primary btn-sm" onclick="openRecModal(\''+p.id+'\')">'+I.plus+' Record</button>';
+  h += '<button class="btn btn-amber btn-sm" onclick="openEditRij(\''+p.id+'\')">'+I.rij+' Rijbewijs</button>';
+  h += '<button class="btn btn-ghost btn-sm" onclick="openEditStatus(\''+p.id+'\')"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> Status</button>';
+  h += '<button class="btn btn-danger btn-sm" onclick="doVerwijder(\''+p.id+'\')">'+I.del+' Verwijder</button>';
+  h += '</div></div>';
+
+  h += '<div class="info-grid">';
+  h += ib('Geboortedatum', fDate(p.geboortedatum));
+  h += ib('Nationaliteit', esc(p.nationaliteit||'—'));
+  h += ib('Rijbewijs', '<span class="'+rKls+'">'+rTxt+'</span>');
+  h += ib('Totaal boetes', '<span class="gld">\u20AC'+totaal.toFixed(2)+'</span>');
+  h += '<div class="info-block" style="grid-column:span 2"><div class="info-label">Nummerplaat</div>';
+  h += '<div class="plaat-row">'+plaatHtml;
+  h += '<button class="icon-btn" style="width:22px;height:22px" onclick="openEditPlaat(\''+p.id+'\')" title="Wijzigen">'+I.edit+'</button></div></div>';
+  h += '</div>';
+
+  h += recSec('Boetes', bo, 'd-gold', p);
+  h += recSec('Arrestaties', ar, 'd-red', p);
+  h += recSec('Waarschuwingen', wa, 'd-blue', p);
+  if(no.length) h += recSec('Notities', no, 'd-gold', p);
+
+  // Gekoppelde zaken sectie
+  h += '<div class="section"><div class="section-hdr"><span class="section-title">Gekoppelde zaken ('+gekoppeldeZaken.length+')</span></div>';
+  if(!gekoppeldeZaken.length) {
+    h += '<div class="no-rec">Geen zaken gekoppeld aan deze persoon</div>';
+  } else {
+    gekoppeldeZaken.forEach(function(z) {
+      h += '<div class="zaak-card" onclick="selectZaak(\''+z.id+'\')"><div class="zaak-card-top">';
+      h += '<div><div class="zaak-card-num">'+z.id+'</div><div class="zaak-card-title">'+esc(z.titel)+'</div></div>';
+      h += '<div style="display:flex;gap:4px;flex-shrink:0">'+zaakTypeChip(z)+zaakStatusChip(z)+'</div></div>';
+      if(z.omschrijving) h += '<div style="font-size:.82rem;color:var(--t2);margin-top:4px;">'+esc(z.omschrijving)+'</div>';
+      h += '</div>';
+    });
+  }
+  h += '</div>';
+
+  return h;
+}
+
+function ib(label, valHtml) {
+  return '<div class="info-block"><div class="info-label">'+label+'</div><div class="info-val">'+valHtml+'</div></div>';
+}
+
+function recSec(title, lijst, dotCls, p) {
+  var h = '<div class="section"><div class="section-hdr"><span class="section-title">'+title+' ('+lijst.length+')</span></div>';
+  if(!lijst.length) { h += '<div class="no-rec">Geen geregistreerd</div>'; }
+  else {
+    lijst.forEach(function(r) {
+      var idx = (p.records||[]).indexOf(r);
+      var bedrag = r.type==='boete'?'<span class="rec-bedrag">\u20AC'+parseFloat(r.bedrag||0).toFixed(2)+'</span>':'';
+      h += '<div class="rec-row"><div class="rec-dot '+dotCls+'"></div>';
+      h += '<div class="rec-body"><div class="rec-reden">'+esc(r.reden)+'</div>';
+      h += '<div class="rec-datum">'+fDate(r.datum)+'</div></div>';
+      h += bedrag;
+      h += '<button class="rec-del" onclick="doDelRecord(event,\''+p.id+'\','+idx+')" title="Verwijderen">'+I.del+'</button></div>';
+    });
+  }
+  h += '</div>';
+  return h;
+}
+
+// ── SELECT ZAAK ───────────────────────────────────────────────────────
+function selectZaak(id) {
+  activeZaakId = id;
+  activeId = null;
+  var z = findZ(id); if(!z) return;
+  renderSidebar();
+  closeDrawer();
+  showDossier(buildZaakDossier(z));
+}
+
+function buildZaakDossier(z) {
+  var betP = (z.betrokkenen||[]).map(function(pid){ return findP(pid); }).filter(Boolean);
+
+  var h = '<div class="dos-topbar">';
+  h += '<div>';
+  h += '<div class="dos-name-row">';
+  h += '<div class="dos-name">'+esc(z.titel)+'</div>';
+  h += '<button class="icon-btn" onclick="openZaakEdit(\''+z.id+'\')" title="Zaak bewerken">'+I.edit+'</button>';
+  h += '</div>';
+  h += '<div class="dos-id">Zaak-ID: '+z.id+' &nbsp;&middot;&nbsp; Aangemaakt: '+fDate(z.aangemaakt)+'</div>';
+  h += '<div class="dos-chips">'+zaakTypeChip(z)+zaakStatusChip(z)+'</div>';
+  h += '</div>';
+  h += '<div class="dos-actions">';
+  h += '<button class="btn btn-ghost btn-sm" onclick="openZaakEdit(\''+z.id+'\')">'+I.edit+' Bewerken</button>';
+  h += '<button class="btn btn-danger btn-sm" onclick="doVerwijderZaak(\''+z.id+'\')">'+I.del+' Verwijder</button>';
+  h += '</div></div>';
+
+  if(z.omschrijving) {
+    h += '<div class="info-block" style="margin-bottom:1.25rem"><div class="info-label">Omschrijving</div>';
+    h += '<div style="font-size:.875rem;color:var(--t1);line-height:1.6;margin-top:4px">'+esc(z.omschrijving)+'</div></div>';
+  }
+
+  h += '<div class="section"><div class="section-hdr"><span class="section-title">Betrokkenen ('+betP.length+')</span></div>';
+  if(!betP.length) {
+    h += '<div class="no-rec">Geen betrokkenen gekoppeld</div>';
+  } else {
+    betP.forEach(function(p) {
+      var s = p.status||'vrij';
+      var sCls = s==='opgepakt'?'status-opgepakt':s==='voortvluchtig'?'status-voortvluchtig':'status-vrij';
+      h += '<div class="rec-row" style="cursor:pointer" onclick="selectPerson(\''+p.id+'\')">';
+      h += '<div class="pr-av" style="width:32px;height:32px;font-size:.65rem;flex-shrink:0">'+initials(p.naam)+'</div>';
+      h += '<div class="rec-body"><div class="rec-reden">'+esc(p.naam)+'</div>';
+      h += '<div class="rec-datum">'+p.id+(p.nummerplaat?' &middot; '+esc(p.nummerplaat):'')+'</div></div>';
+      h += '<div style="display:flex;gap:4px;flex-wrap:wrap">'+chips(p)+'</div>';
+      h += '</div>';
+    });
+  }
+  h += '</div>';
+  return h;
+}
+
+function showDossier(html) {
+  document.getElementById('emptyState').style.display = 'none';
+  var dw = document.getElementById('dossierWrap');
+  dw.style.display = 'block';
+  document.getElementById('dossier').innerHTML = html;
+}
+
+// ── MODALS ────────────────────────────────────────────────────────────
+function openM(id) {
+  if(id==='mAdd') {
+    document.getElementById('aNaam').value='';
+    document.getElementById('aGeb').value='';
+    document.getElementById('aNat').value='';
+    document.getElementById('aRij').value='geldig';
+    document.getElementById('aStatus').value='vrij';
+    document.getElementById('aPlaat').value='';
+    document.getElementById('aNote').value='';
+    document.getElementById('aNaamW').style.display='none';
+    document.getElementById(id).classList.add('open');
+    setTimeout(function(){ document.getElementById('aNaam').focus(); }, 200);
+    return;
+  }
+  if(id==='mZaak') {
+    document.getElementById('zTitel').value='';
+    document.getElementById('zType').value='misdrijf';
+    document.getElementById('zStatus').value='open';
+    document.getElementById('zOmschrijving').value='';
+    document.getElementById('zTitelW').style.display='none';
+    renderBetrokkenenList('betrokkenenList', []);
+    document.getElementById(id).classList.add('open');
+    setTimeout(function(){ document.getElementById('zTitel').focus(); }, 200);
+    return;
+  }
+  document.getElementById(id).classList.add('open');
+}
+function closeM(id) { document.getElementById(id).classList.remove('open'); }
+
+document.querySelectorAll('.overlay').forEach(function(el) {
+  el.addEventListener('click', function(e){ if(e.target===el) el.classList.remove('open'); });
+});
+
+// ── CONFIRM ───────────────────────────────────────────────────────────
+function askConfirm(tekst, cb) { confirmCb=cb; document.getElementById('confirmText').textContent=tekst; document.getElementById('mConfirm').classList.add('open'); }
+function confirmJa()  { closeM('mConfirm'); if(confirmCb){ confirmCb(); confirmCb=null; } }
+function confirmNee() { closeM('mConfirm'); confirmCb=null; }
+
+// ── ADD PERSON ────────────────────────────────────────────────────────
+function doAdd() {
+  var naam = document.getElementById('aNaam').value.trim();
+  if(!naam){ document.getElementById('aNaamW').style.display='block'; return; }
+  document.getElementById('aNaamW').style.display='none';
+  var notitie = document.getElementById('aNote').value.trim();
+  var plaat = document.getElementById('aPlaat').value.trim().toUpperCase();
+  var p = {
+    id: uid('P'),
+    naam: naam,
+    geboortedatum: document.getElementById('aGeb').value,
+    nationaliteit: document.getElementById('aNat').value.trim(),
+    rijbewijs: document.getElementById('aRij').value,
+    status: document.getElementById('aStatus').value,
+    nummerplaat: plaat||null,
+    aangemaakt: today(),
+    records: notitie?[{type:'notitie',reden:notitie,datum:today()}]:[]
+  };
+  db.push(p); saveDB(); closeM('mAdd'); refreshAll(); selectPerson(p.id);
+}
+
+// ── RECORD ────────────────────────────────────────────────────────────
+function openRecModal(pid) {
+  activePid = pid;
+  var p = findP(pid);
+  document.getElementById('mRecTitle').textContent = 'Record toevoegen — '+p.naam;
+  document.getElementById('rType').value='boete';
+  document.getElementById('rReden').value='';
+  document.getElementById('rBedrag').value='';
+  toggleBedrag();
+  document.getElementById('mRec').classList.add('open');
+  setTimeout(function(){ document.getElementById('rReden').focus(); }, 200);
+}
+function toggleBedrag() {
+  document.getElementById('rBedragGroup').style.display = document.getElementById('rType').value==='boete'?'flex':'none';
+}
+function doRec() {
+  var reden = document.getElementById('rReden').value.trim();
+  if(!reden){ alert('Omschrijving is verplicht'); return; }
+  var p = findP(activePid); if(!p) return;
+  if(!p.records) p.records=[];
+  p.records.push({ type:document.getElementById('rType').value, reden:reden, bedrag:parseFloat(document.getElementById('rBedrag').value)||0, datum:today() });
+  saveDB(); closeM('mRec'); refreshAll();
+  if(activeId===activePid) showDossier(buildDossier(p));
+}
+function doDelRecord(evt, pid, idx) {
+  evt.stopPropagation();
+  var p = findP(pid); if(!p) return;
+  var r = p.records[idx];
+  askConfirm('Record verwijderen: "'+(r?r.reden:'dit record')+'"?', function(){
+    var p2=findP(pid); if(!p2) return;
+    p2.records.splice(idx,1);
+    saveDB(); refreshAll();
+    if(activeId===pid) showDossier(buildDossier(p2));
+  });
+}
+
+// ── NAAM / RIJ / STATUS / PLAAT BEWERKEN ─────────────────────────────
+function openEditNaam(id) {
+  activePid=id; var p=findP(id);
+  document.getElementById('nNaam').value=p.naam;
+  document.getElementById('nNaamW').style.display='none';
+  document.getElementById('mNaam').classList.add('open');
+  setTimeout(function(){ document.getElementById('nNaam').focus(); },200);
+}
+function doNaam() {
+  var naam=document.getElementById('nNaam').value.trim();
+  if(!naam){ document.getElementById('nNaamW').style.display='block'; return; }
+  var p=findP(activePid); if(!p) return;
+  p.naam=naam; saveDB(); closeM('mNaam'); refreshAll();
+  if(activeId===activePid) showDossier(buildDossier(p));
+}
+function openEditRij(id) {
+  activePid=id; var p=findP(id);
+  document.getElementById('rijStatus').value=p.rijbewijs||'geldig';
+  document.getElementById('mRij').classList.add('open');
+}
+function doRij() {
+  var p=findP(activePid); if(!p) return;
+  p.rijbewijs=document.getElementById('rijStatus').value;
+  saveDB(); closeM('mRij'); refreshAll();
+  if(activeId===activePid) showDossier(buildDossier(p));
+}
+function openEditStatus(id) {
+  activePid=id; var p=findP(id);
+  document.getElementById('sStatus').value=p.status||'vrij';
+  document.getElementById('mStatus').classList.add('open');
+}
+function doStatus() {
+  var p=findP(activePid); if(!p) return;
+  p.status=document.getElementById('sStatus').value;
+  saveDB(); closeM('mStatus'); refreshAll();
+  if(activeId===activePid) showDossier(buildDossier(p));
+}
+function openEditPlaat(id) {
+  activePid=id; var p=findP(id);
+  document.getElementById('pPlaat').value=p.nummerplaat||'';
+  document.getElementById('mPlaatTitle').textContent='Nummerplaat — '+p.naam;
+  document.getElementById('mPlaat').classList.add('open');
+  setTimeout(function(){ document.getElementById('pPlaat').focus(); },200);
+}
+function doPlaat() {
+  var p=findP(activePid); if(!p) return;
+  p.nummerplaat=document.getElementById('pPlaat').value.trim().toUpperCase()||null;
+  saveDB(); closeM('mPlaat'); refreshAll();
+  if(activeId===activePid) showDossier(buildDossier(p));
+}
+
+// ── PERSOON VERWIJDEREN ───────────────────────────────────────────────
+function doVerwijder(id) {
+  var p=findP(id); if(!p) return;
+  askConfirm('"'+p.naam+'" definitief verwijderen?', function(){
+    // Verwijder ook uit zaken
+    zdb.forEach(function(z){ z.betrokkenen=(z.betrokkenen||[]).filter(function(pid){ return pid!==id; }); });
+    db=db.filter(function(x){ return x.id!==id; });
+    activeId=null; saveDB(); saveZDB(); refreshAll();
+    document.getElementById('emptyState').style.display='';
+    document.getElementById('dossierWrap').style.display='none';
+  });
+}
+
+// ── ZAKEN ─────────────────────────────────────────────────────────────
+function renderBetrokkenenList(elId, selected) {
+  var el=document.getElementById(elId); if(!el) return;
+  if(!db.length){ el.innerHTML='<div style="font-family:DM Mono,monospace;font-size:.62rem;color:var(--t3);padding:8px">Geen personen in database</div>'; return; }
+  el.innerHTML = db.map(function(p) {
+    var checked = selected.indexOf(p.id)!==-1 ? ' checked' : '';
+    return '<label class="betrokkene-opt">'
+      +'<input type="checkbox" value="'+p.id+'"'+checked+'>'
+      +'<span>'+esc(p.naam)+'</span>'
+      +'<span style="font-family:DM Mono,monospace;font-size:.6rem;color:var(--t3)">'+p.id+'</span>'
+      +'</label>';
+  }).join('');
+}
+
+function getBetrokkenenSelected(elId) {
+  var el=document.getElementById(elId); if(!el) return [];
+  return Array.from(el.querySelectorAll('input[type=checkbox]:checked')).map(function(c){ return c.value; });
+}
+
+function doZaak() {
+  var titel=document.getElementById('zTitel').value.trim();
+  if(!titel){ document.getElementById('zTitelW').style.display='block'; return; }
+  document.getElementById('zTitelW').style.display='none';
+  var z = {
+    id: uid('Z'),
+    titel: titel,
+    type: document.getElementById('zType').value,
+    status: document.getElementById('zStatus').value,
+    omschrijving: document.getElementById('zOmschrijving').value.trim(),
+    betrokkenen: getBetrokkenenSelected('betrokkenenList'),
+    aangemaakt: today()
+  };
+  zdb.push(z); saveZDB(); closeM('mZaak'); refreshAll();
+  activeTab='zaken'; selectZaak(z.id);
+}
+
+function openZaakEdit(id) {
+  var z=findZ(id); if(!z) return;
+  activePid=id; // reuse activePid for zaak id
+  document.getElementById('zeTitle').value=z.titel;
+  document.getElementById('zeType').value=z.type||'misdrijf';
+  document.getElementById('zeStatus').value=z.status||'open';
+  document.getElementById('zeOmschrijving').value=z.omschrijving||'';
+  renderBetrokkenenList('betrokkenenEditList', z.betrokkenen||[]);
+  document.getElementById('mZaakEdit').classList.add('open');
+}
+
+function doZaakEdit() {
+  var titel=document.getElementById('zeTitle').value.trim();
+  if(!titel){ return; }
+  var z=findZ(activePid); if(!z) return;
+  z.titel=titel;
+  z.type=document.getElementById('zeType').value;
+  z.status=document.getElementById('zeStatus').value;
+  z.omschrijving=document.getElementById('zeOmschrijving').value.trim();
+  z.betrokkenen=getBetrokkenenSelected('betrokkenenEditList');
+  saveZDB(); closeM('mZaakEdit'); refreshAll();
+  activeZaakId=z.id; showDossier(buildZaakDossier(z));
+}
+
+function doVerwijderZaak(id) {
+  var z=findZ(id); if(!z) return;
+  askConfirm('Zaak "'+z.titel+'" definitief verwijderen?', function(){
+    zdb=zdb.filter(function(x){ return x.id!==id; });
+    activeZaakId=null; saveZDB(); refreshAll();
+    document.getElementById('emptyState').style.display='';
+    document.getElementById('dossierWrap').style.display='none';
+  });
+}
+
+// ── MOBILE ────────────────────────────────────────────────────────────
+function toggleDrawer() {
+  var d=document.getElementById('mob-drawer'), b=document.getElementById('mob-backdrop');
+  var open=d.classList.contains('open');
+  if(open){ d.classList.remove('open'); b.classList.remove('open'); }
+  else    { d.classList.add('open');    b.classList.add('open'); }
+}
+function closeDrawer() {
+  document.getElementById('mob-drawer').classList.remove('open');
+  document.getElementById('mob-backdrop').classList.remove('open');
+}
+
+// ── INIT ──────────────────────────────────────────────────────────────
+toggleBedrag();
+refreshAll();
+</script>
+</body>
+</html>
